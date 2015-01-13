@@ -14,7 +14,7 @@ var router = express.Router();
 
 app.use('/scrape',router);
 
-// the actual url should look like this:
+// URL example
 // http://localhost:8081/scrape?title=matrix&year=1999
 router.get('/scrape', function(req, res){
 
@@ -22,12 +22,11 @@ router.get('/scrape', function(req, res){
 	// var query_url="http://www.imdb.com/find?q="+"matrix+1999"+"&s=all";
 	var query_url="http://www.imdb.com/find?q="+req.query.title+"+"+req.query.year+"&s=all";
 
-	// console.log(req);
 	console.log(query_url);
 
-
 	// searches imdb and gets the first result, which is probably correct
-	// returns the movie's URL
+	// takes: a URL in the format, ex: http://www.imdb.com/find?q=matrix+1999&s=all
+	// returns: the movie's URL,  ex: http://www.imdb.com/title/tt0133093/?ref_=fn_al_tt_1
 	var getURL= function(the_url) {
 
 		var some_imdb_url;
@@ -38,31 +37,23 @@ router.get('/scrape', function(req, res){
 
 		request( the_url, function(error, response, html){
 			if(!error){
-
 				var $ = cheerio.load(html);
-
-				// var json = { url : "" };
-
 				var href=$(".findList").find("tr").first().find("a").attr('href');
-				
 				some_imdb_url= "http://www.imdb.com"+href;
-
 				console.log(some_imdb_url);
-
+				
 				deferred.resolve(some_imdb_url);
-			
 			}
-
 		});
 
 		return deferred.promise;
 	};
 
 	
-	// takes the movie's URL
+	// takes: the movie's URL, ex: http://www.imdb.com/title/tt0133093/?ref_=fn_al_tt_1
 	// returns a JSON object with:
-	//    Title, Year, imdb Rating, Director, Actors, Plot, Poster (image url),
-	//	  Metacritic Metascore, imdb Votes, imdb ID
+	//    Title, Year, imdbRating, Director, Actors, Plot, Poster (image url),
+	//	  Metacritic Metascore, imdbVotes, imdbID
 	var get_movie_json= function( the_url) {
 
 		request(the_url, function(error, response, html){
